@@ -1,14 +1,13 @@
 package handler
 
-import (
-	"book-store/internal/api"
+import "github.com/gin-gonic/gin"
 
-	"github.com/gin-gonic/gin"
-)
-
-// ErrorResponse is an alias for api.ErrorResponse kept here for Swagger annotations.
-type ErrorResponse = api.ErrorResponse
+// ErrorResponse is the standard error body returned on failures.
+type ErrorResponse struct {
+	Code  int    `json:"code"`
+	Error string `json:"error"`
+}
 
 func errResp(c *gin.Context, code int, msg string) {
-	api.ErrResp(c, code, msg)
+	c.JSON(code, ErrorResponse{Code: code, Error: msg})
 }
