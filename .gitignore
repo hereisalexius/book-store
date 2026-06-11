@@ -1,2 +1,4 @@
 .env
+.idea
+book-store.iml
 book-store
