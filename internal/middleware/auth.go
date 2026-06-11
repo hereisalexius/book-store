@@ -76,6 +76,12 @@ func (a *Auth) Handler() gin.HandlerFunc {
 			return
 		}
 
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			if oid, ok := claims["oid"].(string); ok {
+				c.Set("user_id", oid)
+			}
+		}
+
 		c.Next()
 	}
 }
