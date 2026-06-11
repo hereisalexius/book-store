@@ -29,7 +29,7 @@ func NewCustomerHandler(svc service.CustomerService) *CustomerHandler {
 func (h *CustomerHandler) GetAll(c *gin.Context) {
 	customers, err := h.svc.GetAll(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, customers)
@@ -49,10 +49,10 @@ func (h *CustomerHandler) GetByID(c *gin.Context) {
 	customer, err := h.svc.GetByID(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "customer not found"})
+			errResp(c, http.StatusNotFound, "customer not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, customer)
@@ -72,12 +72,12 @@ func (h *CustomerHandler) GetByID(c *gin.Context) {
 func (h *CustomerHandler) Create(c *gin.Context) {
 	var req domain.CreateCustomerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errResp(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	customer, err := h.svc.Create(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusCreated, customer)
@@ -99,16 +99,16 @@ func (h *CustomerHandler) Create(c *gin.Context) {
 func (h *CustomerHandler) Update(c *gin.Context) {
 	var req domain.UpdateCustomerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errResp(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	customer, err := h.svc.Update(c.Request.Context(), c.Param("id"), req)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "customer not found"})
+			errResp(c, http.StatusNotFound, "customer not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, customer)
@@ -126,10 +126,10 @@ func (h *CustomerHandler) Update(c *gin.Context) {
 func (h *CustomerHandler) Delete(c *gin.Context) {
 	if err := h.svc.Delete(c.Request.Context(), c.Param("id")); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "customer not found"})
+			errResp(c, http.StatusNotFound, "customer not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Status(http.StatusNoContent)

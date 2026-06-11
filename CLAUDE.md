@@ -78,6 +78,16 @@ migrations/
 | `DB_SSLMODE` | `disable` |
 | `SERVER_PORT` | `8080` |
 
+## Migrations
+
+Versioned SQL files live in `internal/migration/migrations/` and are embedded at compile time. They run automatically on startup via `migration.Run` (fx.Invoke), before the HTTP server starts. `golang-migrate` tracks applied versions in a `schema_migrations` table — re-running the app is safe (`ErrNoChange` is ignored).
+
+To add a new migration, create the next numbered pair:
+```
+internal/migration/migrations/000002_<name>.up.sql
+internal/migration/migrations/000002_<name>.down.sql
+```
+
 ## Running Locally
 
 ```bash
@@ -86,9 +96,6 @@ docker run -d --name bookstore-db \
   -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=bookstore \
   -p 5432:5432 postgres:16-alpine
 
-# Apply schema
-psql postgresql://postgres:postgres@localhost:5432/bookstore -f migrations/001_init_schema.sql
-
-# Run
+# Run — migrations apply automatically on first start
 go run .
 ```

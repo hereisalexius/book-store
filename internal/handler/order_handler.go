@@ -29,7 +29,7 @@ func NewOrderHandler(svc service.OrderService) *OrderHandler {
 func (h *OrderHandler) GetAll(c *gin.Context) {
 	orders, err := h.svc.GetAll(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, orders)
@@ -49,10 +49,10 @@ func (h *OrderHandler) GetByID(c *gin.Context) {
 	order, err := h.svc.GetByID(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
+			errResp(c, http.StatusNotFound, "order not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, order)
@@ -70,7 +70,7 @@ func (h *OrderHandler) GetByID(c *gin.Context) {
 func (h *OrderHandler) GetByCustomer(c *gin.Context) {
 	orders, err := h.svc.GetByCustomer(c.Request.Context(), c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, orders)
@@ -90,16 +90,16 @@ func (h *OrderHandler) GetByCustomer(c *gin.Context) {
 func (h *OrderHandler) Create(c *gin.Context) {
 	var req domain.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errResp(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	order, err := h.svc.Create(c.Request.Context(), req)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			errResp(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusCreated, order)
@@ -120,15 +120,15 @@ func (h *OrderHandler) Create(c *gin.Context) {
 func (h *OrderHandler) UpdateStatus(c *gin.Context) {
 	var req domain.UpdateOrderStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errResp(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err := h.svc.UpdateStatus(c.Request.Context(), c.Param("id"), req); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
+			errResp(c, http.StatusNotFound, "order not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Status(http.StatusNoContent)
@@ -146,10 +146,10 @@ func (h *OrderHandler) UpdateStatus(c *gin.Context) {
 func (h *OrderHandler) Delete(c *gin.Context) {
 	if err := h.svc.Delete(c.Request.Context(), c.Param("id")); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
+			errResp(c, http.StatusNotFound, "order not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Status(http.StatusNoContent)

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"book-store/internal/api"
 	"book-store/internal/config"
 
 	"github.com/MicahParks/keyfunc/v3"
@@ -60,7 +61,8 @@ func (a *Auth) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing bearer token"})
+			c.Abort()
+			api.ErrResp(c, http.StatusUnauthorized, "missing bearer token")
 			return
 		}
 
@@ -72,7 +74,8 @@ func (a *Auth) Handler() gin.HandlerFunc {
 			jwt.WithValidMethods([]string{"RS256"}),
 		)
 		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
+			c.Abort()
+			api.ErrResp(c, http.StatusUnauthorized, "invalid or expired token")
 			return
 		}
 

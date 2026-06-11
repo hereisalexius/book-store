@@ -15,6 +15,7 @@ import (
 	"book-store/internal/config"
 	"book-store/internal/handler"
 	"book-store/internal/middleware"
+	"book-store/internal/migration"
 	"book-store/internal/repository"
 	"book-store/internal/server"
 	"book-store/internal/service"
@@ -49,6 +50,7 @@ func main() {
 		),
 		fx.Provide(middleware.NewAuth),
 		fx.Provide(server.NewServer),
+		fx.Invoke(migration.Run),
 		fx.Invoke(registerHooks),
 	).Run()
 }
