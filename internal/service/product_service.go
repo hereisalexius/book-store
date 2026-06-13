@@ -13,6 +13,7 @@ type ProductService interface {
 	GetByID(ctx context.Context, id string) (*domain.Product, error)
 	Create(ctx context.Context, req domain.CreateProductRequest) (*domain.Product, error)
 	Update(ctx context.Context, id string, req domain.UpdateProductRequest) (*domain.Product, error)
+	Patch(ctx context.Context, id string, req domain.PatchProductRequest) (*domain.Product, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -54,6 +55,23 @@ func (s *productService) Update(ctx context.Context, id string, req domain.Updat
 	}
 	if req.Price > 0 {
 		p.Price = req.Price
+	}
+	if err := s.repo.Update(ctx, p); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func (s *productService) Patch(ctx context.Context, id string, req domain.PatchProductRequest) (*domain.Product, error) {
+	p, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if req.Name != nil {
+		p.Name = *req.Name
+	}
+	if req.Price != nil {
+		p.Price = *req.Price
 	}
 	if err := s.repo.Update(ctx, p); err != nil {
 		return nil, err

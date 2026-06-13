@@ -46,6 +46,7 @@ func NewServer(p Params) *gin.Engine {
 	products.POST("", p.ProductHandler.Create)
 	products.GET("/:id", p.ProductHandler.GetByID)
 	products.PUT("/:id", p.ProductHandler.Update)
+	products.PATCH("/:id", p.ProductHandler.Patch)
 	products.DELETE("/:id", p.ProductHandler.Delete)
 
 	orders := v1.Group("/orders")

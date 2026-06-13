@@ -114,6 +114,37 @@ func (h *ProductHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
+// Patch godoc
+// @Summary      Partially update a product
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                      true  "Product UUID"
+// @Param        body  body      domain.PatchProductRequest  true  "Fields to update"
+// @Success      200   {object}  domain.Product
+// @Failure      400   {object}  ErrorResponse
+// @Failure      404   {object}  ErrorResponse
+// @Failure      500   {object}  ErrorResponse
+// @Security     BearerAuth
+// @Router       /products/{id} [patch]
+func (h *ProductHandler) Patch(c *gin.Context) {
+	var req domain.PatchProductRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		errResp(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	product, err := h.svc.Patch(c.Request.Context(), c.Param("id"), req)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			errResp(c, http.StatusNotFound, "product not found")
+			return
+		}
+		errResp(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, product)
+}
+
 // Delete godoc
 // @Summary      Delete a product
 // @Tags         products
