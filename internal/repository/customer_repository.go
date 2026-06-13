@@ -15,6 +15,8 @@ type CustomerRepository interface {
 	Create(ctx context.Context, c *domain.Customer) error
 	Update(ctx context.Context, c *domain.Customer) error
 	Delete(ctx context.Context, id string) error
+	Upsert(ctx context.Context, c *domain.Customer, syncID string) (inserted bool, err error)
+	DeleteStaleSyncedCustomers(ctx context.Context, syncID string) (int64, error)
 }
 
 type postgresCustomerRepository struct {
@@ -80,6 +82,29 @@ func (r *postgresCustomerRepository) Update(ctx context.Context, c *domain.Custo
 		return ErrNotFound
 	}
 	return nil
+}
+
+func (r *postgresCustomerRepository) Upsert(ctx context.Context, c *domain.Customer, syncID string) (bool, error) {
+	var inserted bool
+	err := r.db.QueryRowContext(ctx,
+		`INSERT INTO customers (id, name, email, last_sync_id)
+		 VALUES ($1, $2, $3, $4)
+		 ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, last_sync_id = EXCLUDED.last_sync_id
+		 RETURNING (xmax = 0)`,
+		c.ID, c.Name, c.Email, syncID,
+	).Scan(&inserted)
+	return inserted, err
+}
+
+func (r *postgresCustomerRepository) DeleteStaleSyncedCustomers(ctx context.Context, syncID string) (int64, error) {
+	result, err := r.db.ExecContext(ctx,
+		`DELETE FROM customers WHERE last_sync_id IS NOT NULL AND last_sync_id != $1`,
+		syncID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 func (r *postgresCustomerRepository) Delete(ctx context.Context, id string) error {

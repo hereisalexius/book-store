@@ -114,6 +114,23 @@ func (h *CustomerHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, customer)
 }
 
+// Sync godoc
+// @Summary      Sync customers from external source
+// @Tags         customers
+// @Produce      json
+// @Success      200  {object}  domain.SyncResult
+// @Failure      500  {object}  ErrorResponse
+// @Security     BearerAuth
+// @Router       /customers/sync [post]
+func (h *CustomerHandler) Sync(c *gin.Context) {
+	result, err := h.svc.Sync(c.Request.Context())
+	if err != nil {
+		errResp(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
 // Delete godoc
 // @Summary      Delete a customer
 // @Tags         customers

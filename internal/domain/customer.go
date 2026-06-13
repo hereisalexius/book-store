@@ -15,3 +15,9 @@ type UpdateCustomerRequest struct {
 	Name  string `json:"name"`
 	Email string `json:"email" binding:"omitempty,email"`
 }
+
+type SyncResult struct {
+	Created int `json:"created"`
+	Updated int `json:"updated"`
+	Deleted int `json:"deleted"`
+}
