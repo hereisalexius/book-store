@@ -33,7 +33,7 @@ func NewServer(p Params) *gin.Engine {
 	customers := v1.Group("/customers")
 	customers.GET("", p.CustomerHandler.GetAll)
 	customers.POST("", p.CustomerHandler.Create)
-	customers.POST("/sync", p.CustomerHandler.Sync)
+	customers.POST("/sync", p.Auth.RequireRole("Admin"), p.CustomerHandler.Sync)
 	customers.GET("/:id", p.CustomerHandler.GetByID)
 	customers.PUT("/:id", p.CustomerHandler.Update)
 	customers.DELETE("/:id", p.CustomerHandler.Delete)

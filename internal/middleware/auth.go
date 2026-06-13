@@ -80,8 +80,39 @@ func (a *Auth) Handler() gin.HandlerFunc {
 			if oid, ok := claims["oid"].(string); ok {
 				c.Set("user_id", oid)
 			}
+			if raw, ok := claims["roles"].([]interface{}); ok {
+				roles := make([]string, 0, len(raw))
+				for _, r := range raw {
+					if s, ok := r.(string); ok {
+						roles = append(roles, s)
+					}
+				}
+				c.Set("roles", roles)
+			}
 		}
 
 		c.Next()
+	}
+}
+
+func (a *Auth) RequireRole(role string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		raw, exists := c.Get("roles")
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+			return
+		}
+		roles, ok := raw.([]string)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+			return
+		}
+		for _, r := range roles {
+			if r == role {
+				c.Next()
+				return
+			}
+		}
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 	}
 }

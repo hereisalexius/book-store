@@ -116,9 +116,11 @@ func (h *CustomerHandler) Update(c *gin.Context) {
 
 // Sync godoc
 // @Summary      Sync customers from external source
+// @Description  Requires the Admin role in the bearer token.
 // @Tags         customers
 // @Produce      json
 // @Success      200  {object}  domain.SyncResult
+// @Failure      403  {object}  ErrorResponse
 // @Failure      500  {object}  ErrorResponse
 // @Security     BearerAuth
 // @Router       /customers/sync [post]
