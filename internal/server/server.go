@@ -17,6 +17,7 @@ type Params struct {
 	CustomerHandler *handler.CustomerHandler
 	ProductHandler  *handler.ProductHandler
 	OrderHandler    *handler.OrderHandler
+	HealthHandler   *handler.HealthHandler
 	Config          *config.Config
 	Auth            *middleware.Auth
 }
@@ -26,6 +27,7 @@ func NewServer(p Params) *gin.Engine {
 	engine.Use(gin.Logger(), gin.Recovery())
 
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	engine.GET("/health", p.HealthHandler.Health)
 
 	v1 := engine.Group("/api/v1")
 	v1.Use(p.Auth.Handler())

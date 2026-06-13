@@ -47,6 +47,7 @@ func main() {
 			handler.NewCustomerHandler,
 			handler.NewProductHandler,
 			handler.NewOrderHandler,
+			handler.NewHealthHandler,
 		),
 		fx.Provide(middleware.NewAuth),
 		fx.Provide(server.NewServer),
